@@ -1,0 +1,83 @@
+[file content begin]
+Module Overview
+The sotmodel module implements a Spin-Orbit Torque (SOT)-driven Magnetic Tunnel Junction (MTJ) device. It dynamically switches between high/low resistance states based on current thresholds and timing conditions.
+
+Key Parameters
+
+Rsot0/Rp0: Base resistances for SOT channel and MTJ.
+
+IniState: Initial MTJ state (0: low-R state, 1: high-R state).
+
+Hx: Magnetic field direction (±20 only).
+
+Iop: Critical switching current (default: 800µA).
+
+width: Minimum pulse width (5ns) for state transitions.
+
+TMR_mis: Mismatch factor for Tunnel Magnetoresistance (TMR).
+
+State Logic
+
+MTJ Resistance States:
+
+State 0: Low resistance Rp = Rp0 × Rp_mis.
+
+State 1: High resistance Rap = Rp × (1 + TMR).
+
+TMR Calculation:
+
+复制
+TMR0 = 1/(a·Vmtj² - b·|Vmtj| + c) - 1   // Coefficients: a=0.1729, b=-0.1315, c=0.4475  
+TMR = TMR0 × TMR_mis  
+Critical Currents & Switching
+
+Threshold Currents:
+
+Iap2p = ±Iop (anti-parallel → parallel).
+
+Ip2ap = ∓Iop (parallel → anti-parallel).
+
+Switching Conditions:
+
+Transient Analysis (tran):
+
+State 0 → 1: switch_p2ap == 1 AND time_p2ap ≥ width.
+
+State 1 → 0: switch_ap2p == 1 AND time_ap2p ≥ width.
+
+DC Analysis (dc): Immediate state change on current threshold crossing.
+
+Core Equations
+
+SOT Current:
+
+
+Isot = V(q, n) / Rsot  
+MTJ Current & Voltage:
+
+
+Istt = (2·V(p,q) + 2·V(p,n)) / (4·Rmtj + Rsot)  
+Vmtj = Istt × Rmtj  
+Port Current Contributions:
+
+
+I(p) <+ Istt  
+I(q) <+ Isot - 0.5·Istt  
+I(n) <+ -Isot - 0.5·Istt  
+Warnings & Notes
+
+Triggers a warning if |Vmtj| > 0.3V (undefined operating region).
+
+Includes optional current warning (commented) for excessive SOT current.
+
+Fixes from original code:
+
+Added TMR_mis parameter.
+
+Corrected ternary operators and syntax errors.
+
+Removed invalid 1j term in Vmtj calculation.
+
+Simplified Behavior
+The MTJ resistance (Rmtj) switches between Rp (low-R) and Rap (high-R) based on the SOT current (Isot), pulse duration, and magnetic field direction. The model supports transient and DC analyses.
+[file content end]
